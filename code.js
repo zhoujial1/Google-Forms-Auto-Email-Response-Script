@@ -66,5 +66,37 @@ function docToHtml(docId) {
     headers: {'Authorization': 'Bearer ' + ScriptApp.getOAuthToken()},
     muteHttpExceptions: true,
   };
-  return UrlFetchApp.fetch(url, param).getContentText();
+  
+  var htmlContent = UrlFetchApp.fetch(url, param).getContentText();
+  
+  // Add responsive email styles
+  var responsiveStyles = `
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      @media screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          padding: 10px !important;
+        }
+      }
+    </style>
+  `;
+  
+  // Insert styles and wrap content in container
+  htmlContent = htmlContent.replace('</head>', responsiveStyles + '</head>');
+  htmlContent = htmlContent.replace('<body', '<body style="margin:0;padding:0;"');
+  htmlContent = htmlContent.replace(/<body[^>]*>([\s\S]*)<\/body>/i, 
+    '<body style="margin:0;padding:0;"><div class="email-container">$1</div></body>');
+  
+  return htmlContent;
 }
